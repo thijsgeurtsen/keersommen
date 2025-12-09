@@ -24,6 +24,8 @@
     }
     h1 { margin: 0 0 .3rem; font-size: 1.8rem; }
     .subtitle { color: #555; margin: 0 0 1.5rem; font-size: .95rem; }
+    .back { font-size: .85rem; margin-bottom: 1rem; }
+    .back a { color: #4f46e5; text-decoration: none; }
 
     .stats {
       display: flex;
@@ -69,23 +71,14 @@
     .feedback.correct { color: #16a34a; }
     .feedback.wrong { color: #dc2626; }
     .result { margin-top: 1.5rem; font-size: 1rem; }
-
-    h2 { margin: 2rem 0 .5rem; font-size: 1.1rem; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: .9rem;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: .4rem .3rem;
-      text-align: center;
-    }
-    th { background: #eef; }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="back">
+      <a href="index.html">← Naar pagina groep 5</a>
+    </div>
+
     <h1>Groep 4 – tafels 2,3,4,5 en 10</h1>
     <p class="subtitle">Maak in 2 minuten zoveel mogelijk sommen met de tafels 2, 3, 4, 5 en 10!</p>
 
@@ -103,19 +96,6 @@
     <button id="startBtn">Start 2-minutentest</button>
 
     <div id="result" class="result"></div>
-
-    <h2>Overzicht scores</h2>
-    <table id="scoreTable">
-      <thead>
-        <tr>
-          <th>Naam</th>
-          <th>Goed</th>
-          <th>Pogingen</th>
-          <th>Percentage</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
   </div>
 
 <script>
@@ -194,18 +174,8 @@
     startBtn.disabled = false;
 
     const percentage = Math.round((score / attempts) * 100) || 0;
-    resultEl.textContent = `Je had ${score} goed van ${attempts} pogingen. (${percentage}%)`;
-
-    const naam = prompt("Naam leerling:");
-    const tableBody = document.querySelector("#scoreTable tbody");
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${naam || "-"}</td>
-      <td>${score}</td>
-      <td>${attempts}</td>
-      <td>${percentage}%</td>
-    `;
-    tableBody.appendChild(row);
+    resultEl.textContent =
+      `Je had ${score} goed van ${attempts} pogingen. (${percentage}%)`;
   }
 
   function checkAnswer(e) {

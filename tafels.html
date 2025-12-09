@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Tafeltrainer - 2 minuten</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f4ff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+    }
+
+    .subtitle {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: #555;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .badge {
+      background: #eef;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .question {
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+    }
+
+    #answer {
+      font-size: 1.6rem;
+      padding: 0.4rem 0.8rem;
+      width: 120px;
+      text-align: center;
+      border-radius: 0.75rem;
+      border: 2px solid #ccc;
+      outline: none;
+    }
+
+    #answer:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79,70,229,0.15);
+    }
+
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: #4f46e5;
+      color: white;
+      font-weight: 600;
+    }
+
+    button:disabled {
+      background: #bbb;
+      cursor: default;
+    }
+
+    .feedback {
+      height: 1.4rem;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    .feedback.correct {
+      color: #16a34a;
+    }
+
+    .feedback.wrong {
+      color: #dc2626;
+    }
+
+    .result {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tafeltrainer</h1>
+    <p class="subtitle">Maak in 2 minuten zoveel mogelijk tafelsommen!</p>
+
+    <div class="stats">
+      <div>⏱ Tijd: <span id="time">2:00</span></div>
+      <div>✅ Goed: <span id="score">0</span></div>
+      <div>📊 Pogingen: <span id="attempts">0</span></div>
+    </div>
+
+    <div class="question" id="question">Druk op “Start”</div>
+
+    <input
+      type="number"
+      id="answer"
+      placeholder="antwoord"
+      disabled
+      autocomplete="off"
+    />
+
+    <div id="feedback" class="feedback"></div>
+
+    <button id="startBtn">Start 2-minutentest</button>
+
+    <div id="result" class="result hidden"></div>
+  </div>
+
+  <script>
+    const timeEl = document.getElementById("time");
+    const scoreEl = document.getElementById("score");
+    const attemptsEl = document.getElementById("attempts");
+    const questionEl = document.getElementById("question");
+    const answerInput = document.getElementById("answer");
+    const feedbackEl = document.getElementById("feedback");
+    const startBtn = document.getElementById("startBtn");
+    const resultEl = document.getElementById("result");
+
+    let timeLeft = 120; // 2 minuten
+    let timerId = null;
+    let score = 0;
+    let attempts = 0;
+    let currentA = null;
+    let currentB = null;
+    let gameActive = false;
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return m + ":" + (s < 10 ? "0" + s : s);
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function newQuestion() {
+      // Hier kun je de tafels beperken, bijvoorbeeld altijd tafel van 2:
+      // currentA = 2;
+      // currentB = randomInt(1, 10);
+
+      // Nu: willekeurige tafels van 1 t/m 10
+      currentA = randomInt(1, 10);
+      currentB = randomInt(1, 10);
+      questionEl.textContent = currentA + " × " + currentB + " = ?";
+      answerInput.value = "";
+      answerInput.focus();
+    }
+
+    function startTimer() {
+      timeLeft = 120;
+      timeEl.textContent = formatTime(timeLeft);
+
+      timerId = setInterval(() => {
+        timeLeft--;
+        timeEl.textContent = formatTime(timeLeft);
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function startGame() {
+      if (gameActive) return;
+
+      gameActive = true;
+      score = 0;
+      attempts = 0;
+      scoreEl.textContent = score;
+      attemptsEl.textContent = attempts;
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+      resultEl.classList.add("hidden");
+      startBtn.disabled = true;
+      answerInput.disabled = false;
+
+      newQuestion();
+      startTimer();
+    }
+
+    function endGame() {
+      gameActive = false;
+      clearInterval(timerId);
+      timerId = null;
+      answerInput.disabled = true;
+      startBtn.disabled = false;
+      questionEl.textContent = "Tijd voorbij!";
+
+      resultEl.textContent =
+        "Je had " + score + " sommen goed van de " + attempts + " pogingen. Goed gedaan!";
+      resultEl.classList.remove("hidden");
+    }
+
+    function checkAnswer() {
+      if (!gameActive) return;
+
+      const value = parseInt(answerInput.value, 10);
+      if (isNaN(value)) {
+        return; // negeer lege invoer
+      }
+
+      const correct = currentA * currentB;
+
+      attempts++;
+      attemptsEl.textContent = attempts;
+
+      if (value === correct) {
+        score++;
+        scoreEl.textContent = score;
+        feedbackEl.textContent = "Goed zo!";
+        feedbackEl.className = "feedback correct";
+      } else {
+        feedbackEl.textContent = "Helaas, het was " + correct + ".";
+        feedbackEl.className = "feedback wrong";
+      }
+
+      newQuestion();
+    }
+
+    startBtn.addEventListener("click", startGame);
+
+    answerInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        checkAnswer();
+      }
+    });
+  </script>
+</body>
+</html>
